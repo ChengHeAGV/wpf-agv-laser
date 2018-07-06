@@ -1,0 +1,36 @@
+﻿https://github.com/siemens/ros-sharp/wiki/Info_CodeExample
+
+using System;
+using RosSharp.RosBridgeClient;
+
+// commands on ROS system:
+// roslaunch rosbridge_server rosbridge_websocket.launch
+// rostopic echo /talker
+// rostopic pub /listener std_msgs/String "World!"
+
+public class HelloWorld
+{
+    public static void Main(string[] args)
+    {
+        RosSocket rosSocket = new RosSocket("ws://192.168.0.101:9090");
+
+        // Publication:
+        string publication_id = rosSocket.Advertise("/talker", "std_msgs/String");
+
+        StandardString message = new StandardString();
+        message.data = "Hello!";
+        rosSocket.Publish(publication_id, message);
+
+        // Subscription:
+        string subscription_id = rosSocket.Subscribe("/listener", "std_msgs/String", subscriptionHandler);
+
+        Console.WriteLine("Press any key to close...");
+        Console.ReadKey(true);
+        rosSocket.Close();
+    }
+    private static void subscriptionHandler(Message message)
+    {
+        StandardString standardString = (StandardString)message;
+        Console.WriteLine(standardString.data);
+    }
+}
